@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battery Price Calculator with VAT (LKR)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .input-group {
+            margin: 10px 0;
+        }
+        label {
+            display: inline-block;
+            width: 200px;
+        }
+        input {
+            padding: 5px;
+            width: 150px;
+        }
+        #result, #vatResult {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Battery Price Calculator with VAT (LKR)</h2>
+    
+    <div class="section">
+        <h3>Price Calculation</h3>
+        <div class="input-group">
+            <label>Retail Price (LKR):</label>
+            <input type="number" id="retailPrice" step="0.01">
+        </div>
+        
+        <div class="input-group">
+            <label>First Discount (%):</label>
+            <input type="number" id="firstDiscount" value="20" step="0.01">
+        </div>
+        
+        <div class="input-group">
+            <label>Second Discount (%):</label>
+            <input type="number" id="secondDiscount" value="0" step="0.01">
+        </div>
+        
+        <div class="input-group">
+            <label>Profit Margin (%):</label>
+            <input type="number" id="profitMargin" value="10" step="0.01">
+        </div>
+        
+        <div class="input-group">
+            <label>Fixed Deduction (LKR):</label>
+            <input type="number" id="fixedDeduction" value="0" step="0.01">
+        </div>
+        
+        <button onclick="calculatePrice()">Calculate</button>
+        <div id="result"></div>
+    </div>
+
+    <div class="section">
+        <h3>VAT Breakdown</h3>
+        <div class="input-group">
+            <label>Price without VAT (LKR):</label>
+            <input type="number" id="withoutVatPrice" step="0.01">
+        </div>
+        
+        <div class="input-group">
+            <label>VAT Rate (%):</label>
+            <input type="number" id="vatRate" value="18" step="0.01">
+        </div>
+        
+        <div id="vatResult"></div>
+    </div>
+
+    <script>
+        let finalPercentage = 0; // To store the percentage from first calculation
+
+        function calculatePrice() {
+            // Price Calculation
+            const retailPrice = parseFloat(document.getElementById('retailPrice').value) || 0;
+            const firstDiscount = parseFloat(document.getElementById('firstDiscount').value) || 0;
+            const secondDiscount = parseFloat(document.getElementById('secondDiscount').value) || 0;
+            const profitMargin = parseFloat(document.getElementById('profitMargin').value) || 0;
+            const fixedDeduction = parseFloat(document.getElementById('fixedDeduction').value) || 0;
+
+            const afterFirstDiscount = Number((retailPrice * (1 - firstDiscount/100)).toFixed(2));
+            const afterSecondDiscount = Number((afterFirstDiscount * (1 - secondDiscount/100)).toFixed(2));
+            const afterProfit = Number((afterSecondDiscount * (1 + profitMargin/100)).toFixed(2));
+            const finalAmount = Number((afterProfit - fixedDeduction).toFixed(2));
+            finalPercentage = Number((((retailPrice - finalAmount) / retailPrice) * 100).toFixed(2));
+
+            let resultHTML = `
+                Initial Price: LKR ${retailPrice.toFixed(2)}<br>
+                After ${firstDiscount}% discount: LKR ${afterFirstDiscount.toFixed(2)}<br>
+                After ${secondDiscount}% additional discount: LKR ${afterSecondDiscount.toFixed(2)}<br>
+                After ${profitMargin}% profit: LKR ${afterProfit.toFixed(2)}<br>
+                After LKR ${fixedDeduction} deduction: LKR ${finalAmount.toFixed(2)}<br>
+                Price difference is ${finalPercentage.toFixed(2)}% of retail price
+            `;
+            document.getElementById('result').innerHTML = resultHTML;
+
+            // VAT Calculation
+            const withoutVatPrice = parseFloat(document.getElementById('withoutVatPrice').value) || 0;
+            const vatRate = parseFloat(document.getElementById('vatRate').value) || 0;
+
+            const vatAmount = Number((withoutVatPrice * (vatRate/100)).toFixed(2));
+            const priceWithVat = Number((withoutVatPrice + vatAmount).toFixed(2));
+            const discountedPrice = Number((priceWithVat * (1 - finalPercentage/100)).toFixed(2));
+            const discountAmount = Number((priceWithVat - discountedPrice).toFixed(2));
+
+            let vatResultHTML = `
+                Price without VAT: LKR ${withoutVatPrice.toFixed(2)}<br>
+                VAT (${vatRate}%): LKR ${vatAmount.toFixed(2)}<br>
+                Price with VAT: LKR ${priceWithVat.toFixed(2)}<br>
+                Discount (${finalPercentage.toFixed(2)}%): LKR ${discountAmount.toFixed(2)}<br>
+                Final Price: LKR ${discountedPrice.toFixed(2)}
+            `;
+            document.getElementById('vatResult').innerHTML = vatResultHTML;
+        }
+    </script>
+</body>
+</html>
